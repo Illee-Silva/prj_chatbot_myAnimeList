@@ -1,0 +1,439 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anime Chatbot</title>
+  <style>
+    :root {
+      --bg: #f6f7fb;
+      --panel: #ffffff;
+      --primary: #165dff;
+      --primary-soft: #e8efff;
+      --text: #1f2430;
+      --muted: #6b7280;
+      --ok: #0a7d33;
+      --danger: #b42318;
+      --border: #dde3ee;
+      --shadow: 0 10px 30px rgba(11, 21, 41, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      color: var(--text);
+      background: radial-gradient(circle at 20% 20%, #e6f0ff 0, transparent 42%),
+                  radial-gradient(circle at 80% 0, #ffe9e2 0, transparent 38%),
+                  var(--bg);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+    }
+
+    .app {
+      width: min(940px, 100%);
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      min-height: 74vh;
+    }
+
+    .sidebar {
+      border-right: 1px solid var(--border);
+      padding: 16px;
+      background: linear-gradient(180deg, #ffffff 0, #fbfcff 100%);
+    }
+
+    .sidebar h1 {
+      margin: 0 0 6px;
+      font-size: 1.15rem;
+    }
+
+    .sidebar p {
+      margin: 0 0 14px;
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.4;
+    }
+
+    .status {
+      margin: 0 0 12px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      background: #f1f5ff;
+      color: var(--muted);
+      font-size: 0.86rem;
+      border: 1px dashed #c7d6f5;
+    }
+
+    .status.ok {
+      color: var(--ok);
+      background: #ebf9f0;
+      border-color: #b8eac8;
+    }
+
+    .status.error {
+      color: var(--danger);
+      background: #fff1f1;
+      border-color: #ffd1d1;
+    }
+
+    .quick-actions,
+    .examples {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    button,
+    .chip {
+      border: 1px solid var(--border);
+      background: #fff;
+      border-radius: 10px;
+      padding: 10px 11px;
+      cursor: pointer;
+      font-size: 0.88rem;
+      text-align: left;
+      transition: all .16s ease;
+    }
+
+    button:hover,
+    .chip:hover {
+      border-color: #b8c8ed;
+      transform: translateY(-1px);
+    }
+
+    .button-primary {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+      font-weight: 600;
+    }
+
+    .chat {
+      display: flex;
+      flex-direction: column;
+      min-height: 100%;
+    }
+
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 18px;
+      display: grid;
+      gap: 10px;
+      align-content: start;
+      background: linear-gradient(180deg, #ffffff 0, #fafbff 100%);
+    }
+
+    .msg {
+      max-width: 88%;
+      border-radius: 12px;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      line-height: 1.45;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    .msg.user {
+      margin-left: auto;
+      background: var(--primary-soft);
+      border-color: #bdd0ff;
+    }
+
+    .msg.bot {
+      margin-right: auto;
+      background: #fff;
+    }
+
+    .meta {
+      margin-top: 7px;
+      color: var(--muted);
+      font-size: 0.8rem;
+      line-height: 1.3;
+    }
+
+    .input-area {
+      border-top: 1px solid var(--border);
+      padding: 12px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      background: #fff;
+    }
+
+    .input-area textarea {
+      width: 100%;
+      resize: none;
+      height: 55px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font: inherit;
+      outline: none;
+    }
+
+    .input-area textarea:focus {
+      border-color: #9cb5ed;
+      box-shadow: 0 0 0 2px #dce7ff;
+    }
+
+    .sources {
+      margin-top: 8px;
+      display: grid;
+      gap: 6px;
+    }
+
+    .source-card {
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      padding: 8px;
+      background: #fbfcff;
+      font-size: 0.82rem;
+    }
+
+    .source-card a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    @media (max-width: 860px) {
+      .app {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        border-right: 0;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .msg {
+        max-width: 96%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <aside class="sidebar">
+      <h1>Anime Chatbot</h1>
+      <p>Converse com o bot via API Flask. Clique em atualizar dados antes de perguntar.</p>
+
+      <div id="status" class="status">Verificando API...</div>
+
+      <div class="quick-actions">
+        <button id="crawlBtn" class="button-primary">Atualizar dados (/crawl)</button>
+      </div>
+
+      <p style="margin-bottom: 8px;">Sugestoes rapidas:</p>
+      <div class="examples">
+        <button class="chip" data-question="Quais sao os animes mais bem avaliados?">Top animes</button>
+        <button class="chip" data-question="Quais animes estao em lancamento na temporada atual?">Temporada atual</button>
+        <button class="chip" data-question="Me fale sobre Berserk">Detalhes de um anime</button>
+        <button class="chip" data-question="Oi">Saudacao</button>
+      </div>
+    </aside>
+
+    <section class="chat">
+      <div id="messages" class="messages"></div>
+
+      <form id="chatForm" class="input-area">
+        <textarea id="question" placeholder="Digite sua pergunta sobre animes..."></textarea>
+        <button class="button-primary" type="submit">Enviar</button>
+      </form>
+    </section>
+  </main>
+
+  <script>
+    const statusEl = document.getElementById("status");
+    const messagesEl = document.getElementById("messages");
+    const formEl = document.getElementById("chatForm");
+    const inputEl = document.getElementById("question");
+    const crawlBtn = document.getElementById("crawlBtn");
+    const clientBlockedPatterns = [
+      /\bseu\s+merda\b/i,
+      /\bvai\s+se\s+foder\b/i,
+      /\bvai\s+tomar\s+no\s+cu\b/i,
+      /\bfilho\s+da\s+puta\b/i,
+      /\barrombado\b/i,
+      /\bracista\b/i,
+      /\bxenofobia\b/i
+    ];
+
+    function normalizeForSafety(text) {
+      return (text || "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .replace(/[^a-z0-9\s]/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+    function hasBlockedTerms(text) {
+      const normalized = normalizeForSafety(text);
+      return clientBlockedPatterns.some((pattern) => pattern.test(normalized));
+    }
+
+    function addMessage(role, text, meta = null, sources = []) {
+      const msg = document.createElement("div");
+      msg.className = `msg ${role}`;
+      msg.textContent = text;
+
+      if (meta) {
+        const metaEl = document.createElement("div");
+        metaEl.className = "meta";
+        metaEl.textContent = meta;
+        msg.appendChild(metaEl);
+      }
+
+      if (Array.isArray(sources) && sources.length > 0) {
+        const srcWrap = document.createElement("div");
+        srcWrap.className = "sources";
+
+        sources.slice(0, 3).forEach((src) => {
+          const card = document.createElement("div");
+          card.className = "source-card";
+
+          const title = document.createElement("strong");
+          title.textContent = src.title || "Fonte";
+          card.appendChild(title);
+
+          const br = document.createElement("br");
+          card.appendChild(br);
+
+          const link = document.createElement("a");
+          link.href = src.url || "#";
+          link.target = "_blank";
+          link.rel = "noopener noreferrer";
+          link.textContent = src.url || "sem URL";
+          card.appendChild(link);
+
+          if (typeof src.score === "number") {
+            const score = document.createElement("div");
+            score.className = "meta";
+            score.textContent = `similaridade: ${src.score.toFixed(4)}`;
+            card.appendChild(score);
+          }
+
+          srcWrap.appendChild(card);
+        });
+
+        msg.appendChild(srcWrap);
+      }
+
+      messagesEl.appendChild(msg);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    function setStatus(text, kind = "") {
+      statusEl.textContent = text;
+      statusEl.className = `status ${kind}`.trim();
+    }
+
+    async function checkHealth() {
+      try {
+        const response = await fetch("/health");
+        if (!response.ok) throw new Error("API indisponivel");
+        setStatus("API online.", "ok");
+      } catch (_error) {
+        setStatus("API fora do ar. Inicie o app.py para usar o chat.", "error");
+      }
+    }
+
+    async function runCrawl() {
+      setStatus("Coletando dados no MyAnimeList...", "");
+      crawlBtn.disabled = true;
+
+      try {
+        const response = await fetch("/crawl", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({})
+        });
+
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Falha no crawl");
+
+        setStatus(`Dados atualizados (${data.documents_indexed} documentos).`, "ok");
+        addMessage("bot", "Base atualizada com sucesso. Pode mandar sua pergunta sobre anime.");
+      } catch (error) {
+        setStatus(`Erro no crawl: ${error.message}`, "error");
+        addMessage("bot", "Nao consegui atualizar os dados agora. Tente novamente em alguns segundos.");
+      } finally {
+        crawlBtn.disabled = false;
+      }
+    }
+
+    async function askBot(question) {
+      addMessage("user", question);
+      addMessage("bot", "Pensando...");
+      const typingNode = messagesEl.lastChild;
+
+      try {
+        const response = await fetch("/ask", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ question, top_k: 3 })
+        });
+
+        const data = await response.json();
+
+        typingNode.remove();
+
+        if (!response.ok) {
+          addMessage("bot", data.error || "Ocorreu um erro ao processar a pergunta.");
+          return;
+        }
+
+        const intentLabel = data.intent ? `intent: ${data.intent}` : null;
+        addMessage("bot", data.answer || "Sem resposta.", intentLabel, data.results || []);
+      } catch (_error) {
+        typingNode.remove();
+        addMessage("bot", "Falha de conexao com a API. Verifique se o servidor esta rodando.");
+      }
+    }
+
+    document.querySelectorAll(".chip").forEach((button) => {
+      button.addEventListener("click", () => {
+        inputEl.value = button.dataset.question || "";
+        inputEl.focus();
+      });
+    });
+
+    crawlBtn.addEventListener("click", runCrawl);
+
+    formEl.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const question = inputEl.value.trim();
+      if (!question) return;
+
+      if (hasBlockedTerms(question)) {
+        addMessage(
+          "bot",
+          "Mensagem bloqueada por linguagem inadequada. Tente uma pergunta sobre animes."
+        );
+        inputEl.value = "";
+        return;
+      }
+
+      inputEl.value = "";
+      await askBot(question);
+    });
+
+    addMessage("bot", "Oi! Eu sou seu assistente de animes. Clique em 'Atualizar dados' e depois pergunte algo.");
+    checkHealth();
+  </script>
+</body>
+</html>
