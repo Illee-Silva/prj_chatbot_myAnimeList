@@ -165,7 +165,7 @@ class TFIDFChatbot:
 
     def _detect_intent(self, q: str) -> str:
         """Detecta intenção da pergunta para respostas mais naturais."""
-        if re.fullmatch(r"(oi|ola|olá|eae|eae+|hey|hello|salve|bom dia|boa tarde|boa noite)\W*", q):
+        if re.fullmatch(r"(oi|oi+|ola|olá|eae|eae+|hey|hello|salve|bom dia|boa tarde|boa noite)\W*", q):
             return "greeting"
 
         if re.search(r"\b(?:me\s+fale|me\s+fala|fale|fala)\s+sobre\b", q):
