@@ -63,7 +63,7 @@ class TFIDFChatbot:
     def ask(self, question: str, top_k: int = 3) -> List[SearchResult]:
         """Retorna os documentos mais relevantes para a pergunta do usuário."""
         if self.word_tfidf_matrix is None or not self.documents:
-            raise ValueError("Índice TF-IDF ainda não foi construído.")
+            raise ValueError("Índice TF-IDF ainda não foi construído. Por Favor clique no botão de atualizar a base")
 
         expanded_question = self._expand_portuguese_query(question)
         normalized_question = self.preprocessor.normalize_text(expanded_question)
